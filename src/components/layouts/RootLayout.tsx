@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 
-const DocsLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
+const RootLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <>
       <Header />
@@ -12,4 +12,4 @@ const DocsLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-export default DocsLayout;
+export default RootLayout;

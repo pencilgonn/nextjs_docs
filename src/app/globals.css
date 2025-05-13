@@ -28,3 +28,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.scroll__custom::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll__custom::-webkit-scrollbar-thumb {
+  background: var(--foreground);
+  border-radius: 50px;
+}
