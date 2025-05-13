@@ -8,10 +8,11 @@ let isTouchDeviceResult: boolean | undefined;
  * Return true if the user is using a Mac (as opposed to Windows, etc.) device.
  */
 export function isMac(): boolean {
+  if (typeof window === "undefined") return false;
   if (isMacResult === undefined) {
-    isMacResult = navigator.platform.includes("Mac");
+    isMacResult = navigator?.platform.includes("Mac");
   }
-  return isMacResult;
+  return !!isMacResult;
 }
 
 export function getShortcutKey(key: string): string {

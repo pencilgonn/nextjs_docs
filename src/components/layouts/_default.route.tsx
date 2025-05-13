@@ -12,6 +12,8 @@ export const routes = [
           {
             label: "React Portal",
             to: "/docs/reactjs/components/react-portal",
+            brief:
+              "Playwright is a testing framework that lets you automate Chromium, Firefox, and WebKit with a single API. You can use it to write End-to-End (E2E) testing",
             icon: null,
           },
         ],
@@ -24,6 +26,8 @@ export const routes = [
           {
             label: "useAsyncInitialize()",
             to: "/docs/reactjs/hooks/useAsyncInitialize",
+            brief:
+              "Playwright is a testing framework that lets you automate Chromium, Firefox, and WebKit with a single API. You can use it to write End-to-End (E2E) testing",
             icon: null,
           },
         ],
@@ -38,21 +42,6 @@ export const routes = [
             to: "/docs/reactjs/functions/buildCurrentUrlWithParameter",
             brief:
               "Playwright is a testing framework that lets you automate Chromium, Firefox, and WebKit with a single API. You can use it to write End-to-End (E2E) testing",
-            icon: null,
-          },
-          {
-            label: "buildCurrentUrlWithParameter()",
-            to: "/docs/reactjs/functions/buildCurrentUrlWithParameter",
-            icon: null,
-          },
-          {
-            label: "buildCurrentUrlWithParameter()",
-            to: "/docs/reactjs/functions/buildCurrentUrlWithParameter",
-            icon: null,
-          },
-          {
-            label: "buildCurrentUrlWithParameter()",
-            to: "/docs/reactjs/functions/buildCurrentUrlWithParameter",
             icon: null,
           },
         ],

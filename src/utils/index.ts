@@ -17,4 +17,16 @@ function flattenRoutes(routes: any[]) {
   return result;
 }
 
-export { flattenRoutes };
+function textToSlug(text: string) {
+  return text
+    .toString()
+    .normalize("NFKD") // Normalize accents
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .toLowerCase() // Convert to lowercase
+    .trim() // Trim whitespace
+    .replace(/[^a-z0-9 -]/g, "") // Remove invalid chars
+    .replace(/\s+/g, "-") // Replace spaces with -
+    .replace(/-+/g, "-"); // Remove duplicate -
+}
+
+export { flattenRoutes, textToSlug };
