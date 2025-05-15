@@ -8,7 +8,7 @@ const Navigate: React.FC<{ flatArrRoutes: any[]; currentRoute: any }> = ({
 }) => {
   const pathname = usePathname();
 
-  if (pathname == "/docs") return null;
+  if (pathname == "/docs" || pathname == "/docs/welcome") return null;
 
   return (
     <div className="mt-10 pt-10 border-t border-t-gray-300/20 grid grid-cols-2 gap-6">
