@@ -1,0 +1,93 @@
+# useImperativeHandle
+
+## Code
+
+```javascript
+import {
+  createRef,
+  RefObject,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import Modal from "@/components/ui/modal";
+import { Button } from "@/components/ui/button";
+import { LoaderCircle } from "lucide-react";
+import Image from "next/image";
+
+type Props = {
+    // type ...
+} & React.ComponentProps<"div">;
+
+type Ref = {
+  showModal: (
+    onConfirm: () => Promise<void>,
+    title: string,
+  ) => void;
+};
+
+const ref = createRef<Ref>();
+
+export const showModal = (
+  onConfirm: () => Promise<void>,
+  title: string,
+) => {
+  return ref.current?.showModal(onConfirm, title, description);
+};
+
+const ModalAction: React.FC<Props> = ({
+  children,
+  ...props
+}) => {
+  const [isPending, setIsPending] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const funcRef = useRef<() => Promise<void>>(null);
+
+  const showModal = useCallback(
+    (onConfirm: () => Promise<void>, title: string, description: string) => {
+      setOpen(true);
+      setTitle(title);
+      funcRef.current = onConfirm;
+    },
+    []
+  );
+
+  const handleConfirm = async () => {
+    setIsPending(true);
+    try {
+      await funcRef.current?.();
+    } catch (error) {
+      console.log("ModalAction==>handleConfirm==>error", error);
+      setOpen(false);
+    } finally {
+      setOpen(false);
+      setIsPending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setIsPending(false);
+    }
+  }, [open]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      showModal,
+    }),
+    [showModal]
+  );
+
+  return (
+    <Modal {...props}>
+        // content, ui, etc.
+    </Modal>
+  );
+};
+
+export default ModalAction;
+```

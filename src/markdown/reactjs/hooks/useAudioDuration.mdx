@@ -1,0 +1,44 @@
+# useAudioDuration()
+
+## Code
+
+``` useAudioDuration.ts
+import { useState, useEffect } from "react";
+
+const useAudioDuration = (audioUrl: string) => {
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    if (!audioUrl) {
+      setDuration(0);
+      return;
+    }
+
+    const audio = new Audio(audioUrl);
+
+    const handleLoadedMetadata = () => {
+      if (audio.duration && !isNaN(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
+
+    const handleError = () => {
+      setDuration(0);
+    };
+
+    // Add event listeners
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("error", handleError);
+
+    // Cleanup on unmount
+    return () => {
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("error", handleError);
+    };
+  }, [audioUrl]);
+
+  return { duration };
+};
+
+export default useAudioDuration;
+```

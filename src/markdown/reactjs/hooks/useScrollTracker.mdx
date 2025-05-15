@@ -1,0 +1,40 @@
+# useScrollTracker()
+
+## Code
+
+``` useScrollTracker.ts
+import { RefObject, useEffect, useRef, useState } from "react";
+
+export default function useScrollTracker(ref: RefObject<HTMLElement>) {
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+
+    const checkScrollPosition = () => {
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+
+      // Với flex-col-reverse: scrollTop = 0 nghĩa là đang ở "bottom"
+      const isNearBottom = el.scrollTop <= 50;
+
+      if (isNearBottom) {
+        scrollTimeout.current = setTimeout(() => {
+          setIsAtBottom(!(el.scrollTop < -30));
+        }, 100);
+      }
+    };
+
+    el.addEventListener("scroll", checkScrollPosition, { passive: true });
+    checkScrollPosition();
+
+    return () => {
+      el.removeEventListener("scroll", checkScrollPosition);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    };
+  }, [ref]);
+
+  return { isAtBottom, setIsAtBottom };
+}
+```

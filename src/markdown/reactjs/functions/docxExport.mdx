@@ -1,0 +1,109 @@
+# docxExport
+
+Export content to file .docx
+
+## Code
+
+``` javascript
+import { Packer, WidthType } from "docx";
+import { DocxSerializer, defaultMarks, defaultNodes } from "prosemirror-docx";
+import type { Node as ProseMirrorNode } from "prosemirror-model";
+import { DOMParser as ProseMirrorDOMParser } from "prosemirror-model";
+import { schema as basicSchema } from "prosemirror-schema-basic";
+import { addListNodes } from "prosemirror-schema-list";
+import { Schema } from "prosemirror-model";
+
+const isBrowser = typeof window !== "undefined";
+
+// Hàm hỗ trợ tải file trong trình duyệt
+function downloadFromBlob(blob: Blob, filename: string) {
+  if (!isBrowser) {
+    console.error("Download is not supported in Node.js");
+    return;
+  }
+
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+// Tuỳ chỉnh serialize node (có thể mở rộng thêm)
+const nodeSerializer = {
+  ...defaultNodes,
+  hardBreak: defaultNodes.hard_break,
+  codeBlock: defaultNodes.code_block,
+  orderedList: defaultNodes.ordered_list,
+  listItem: defaultNodes.list_item,
+  bulletList: defaultNodes.bullet_list,
+  horizontalRule: defaultNodes.horizontal_rule,
+
+  image(state: any, node: any) {
+    state.renderInline(node); // placeholder image
+    state.closeBlock(node);
+  },
+
+  table(state: any, node: any) {
+    state.table(node, {
+      tableOptions: {
+        width: {
+          size: 100,
+          type: WidthType.PERCENTAGE,
+        },
+      },
+    });
+  },
+};
+
+const docxSerializer = new DocxSerializer(nodeSerializer, defaultMarks);
+
+/**
+ * Export nội dung từ ProseMirrorNode sang file .docx và tải xuống
+ * @param doc - ProseMirrorNode (editor.state.doc)
+ * @param filename - Tên file muốn lưu (ví dụ: 'document.docx')
+ */
+export async function exportContentToDocx(
+  doc: ProseMirrorNode,
+  filename = "document.docx"
+) {
+  const options = {
+    getImageBuffer: async (src: string) => {
+      const response = await fetch(src);
+      const buffer = await response.arrayBuffer();
+      return new Uint8Array(buffer);
+    },
+  };
+
+  const wordDoc = docxSerializer.serialize(doc, options as any);
+  const blob = await Packer.toBlob(wordDoc);
+
+  downloadFromBlob(blob, filename);
+}
+
+const schema = new Schema({
+  nodes: addListNodes(basicSchema.spec.nodes, "paragraph block*", "block"),
+  marks: basicSchema.spec.marks,
+});
+/**
+ * Convert HTML string sang ProseMirror Node
+ */
+function htmlToProseMirrorNode(html: string): any {
+  const parser = new DOMParser();
+  const dom = parser.parseFromString(html, "text/html");
+
+  return ProseMirrorDOMParser.fromSchema(schema).parse(dom.body);
+}
+
+/**
+ * Convert HTML string sang file .docx và tải xuống
+ */
+export async function exportHtmlToDocx(
+  htmlString: string,
+  filename = "export.docx"
+) {
+  const pmNode = htmlToProseMirrorNode(htmlString);
+  await exportContentToDocx(pmNode, filename);
+}
+```

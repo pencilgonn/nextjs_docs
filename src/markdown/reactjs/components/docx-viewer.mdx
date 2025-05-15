@@ -1,0 +1,57 @@
+# Docx viewer
+
+## Code
+
+```javascript
+import axios from "axios";
+import { useEffect, useRef } from "react";
+import * as docx from "docx-preview";
+
+type TFile = {
+  id: string,
+  name: string,
+  originalName: string,
+  url: string,
+  mimetype: string,
+  size: number,
+  isPublic: boolean,
+  uploadedBy: string,
+  createdAt: string,
+  fileCategory: string,
+  status: string,
+  statusUpdatedAt: string,
+};
+
+const DocxViewer: React.FC<{ file: TFile }> = ({ file }) => {
+  const containerRef = useRef < HTMLDivElement > null;
+
+  useEffect(() => {
+    const fetchAndRenderDocx = async () => {
+      try {
+        const response = await axios.get(file.url, {
+          responseType: "blob",
+        });
+
+        const blob = new Blob([response.data], { type: file.mimetype });
+        if (containerRef.current) {
+          containerRef.current.innerHTML = "";
+          docx.renderAsync(blob, containerRef.current, containerRef.current, {
+            ignoreWidth: true,
+            inWrapper: false,
+            renderHeaders: true,
+            renderFooters: true,
+          });
+        }
+      } catch (error) {
+        console.error("Error loading DOCX file:", error);
+      }
+    };
+
+    fetchAndRenderDocx();
+  }, [file]);
+
+  return <div ref={containerRef} className="docx-container mb-16"></div>;
+};
+
+export default DocxViewer;
+```

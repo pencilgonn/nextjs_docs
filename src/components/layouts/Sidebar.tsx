@@ -35,7 +35,7 @@ const Menu: React.FC<{
   route: Route;
   level: number;
 }> = ({ route, level }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!(level == 0));
   const pathname = usePathname();
 
   return (
@@ -66,7 +66,7 @@ const Menu: React.FC<{
         >
           {route.label} {route.icon && route.icon}
         </p>
-        {route.children && route.children.length > 0 && (
+        {route.children && route.children.length > 0 && level > 0 && (
           <ChevronRight size={20} className={cn(open && "rotate-90")} />
         )}
       </Link>
@@ -80,9 +80,11 @@ const Menu: React.FC<{
           {open &&
             route.children &&
             route.children.length > 0 &&
-            route.children.map((item, index) => (
-              <Menu route={item} key={index} level={level + 1} />
-            ))}
+            route.children
+              .sort((a, b) => a.label.localeCompare(b.label))
+              .map((item, index) => (
+                <Menu route={item} key={index} level={level + 1} />
+              ))}
         </AnimatePresence>
       </div>
     </div>

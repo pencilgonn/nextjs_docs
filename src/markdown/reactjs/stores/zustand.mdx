@@ -1,0 +1,26 @@
+# Zustand
+
+## Code
+
+```app.store.ts
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+type State = {
+  // Defind type
+};
+
+const useAppStore = create<State, [["zustand/persist", State]]>(
+  persist(
+    (set, get) => ({
+      // func store
+    }),
+    {
+      name: "...",
+      version: 1,
+    }
+  )
+);
+
+export default useAppStore;
+```

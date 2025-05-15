@@ -1,0 +1,103 @@
+# Range
+
+## Code
+
+```javascript
+"use client";
+
+import { useId, useMemo, useState } from "react";
+import VolummIcon from "../icons/VolummIcon";
+import { cn } from "@/lib/utils";
+import useAppStore from "@/stores/app.store";
+
+const Range = () => {
+  const rawId = useId();
+  const sanitizedId = rawId.replace(/[^a-zA-Z0-9_-]/g, "");
+  const { volume, setVolume } = useAppStore();
+  const [currentTime, setCurrentTime] = useState(volume);
+  const [isDragging, setIsDragging] = useState(false);
+  const valuePercentage = useMemo(() => {
+    return Math.min((currentTime / 100) * 100, 100);
+  }, [currentTime]);
+
+  const calculatePercentage = (e: MouseEvent | TouchEvent) => {
+    const slider = document.querySelector(
+      `.slider-${sanitizedId}`
+    ) as HTMLDivElement;
+    const rect = slider.getBoundingClientRect();
+
+    let clientX = 0;
+    if (e instanceof MouseEvent) {
+      clientX = e.clientX;
+    } else if (e instanceof TouchEvent) {
+      clientX = e.touches[0].clientX;
+    }
+
+    const offsetX = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+    return (offsetX / rect.width) * 100 || 100;
+  };
+  const handleStart = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+  ) => {
+    e.preventDefault();
+    setIsDragging(true);
+
+    const percentage = calculatePercentage(e.nativeEvent);
+    const newValue = (percentage / 100) * 100;
+    setCurrentTime(newValue);
+    setVolume(newValue);
+    const handleMove = (moveEvent: MouseEvent | TouchEvent) => {
+      const percentage = calculatePercentage(moveEvent);
+      const newValue = (percentage / 100) * 100;
+      setCurrentTime(newValue);
+      setVolume(newValue);
+    };
+
+    const handleEnd = () => {
+      setIsDragging(false);
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleMove);
+    window.addEventListener("touchend", handleEnd);
+  };
+  return (
+    <span className="flex cursor-pointer relative group">
+      <VolummIcon />
+
+      <div className="absolute min-w-[130px] left-1/2 group-hover:flex -translate-x-1/2 bg-[#0f0f0f] border__8 bottom-5 w-8 h-6 hidden items-center px-2 rounded">
+        <div
+          className={`grow relative slider-${sanitizedId} group`}
+          onMouseDown={handleStart}
+          onTouchStart={handleStart}
+        >
+          <div
+            className="absolute w-full top-1/2 -translate-y-1/2 bg-[#FFFFFF0A] rounded-full cursor-pointer"
+            style={{ height: 4 }}
+          ></div>
+          <div
+            className={cn(
+              "absolute size-[14px] bg-green-50 rounded-full top-1/2 -translate-y-1/2 z-20 flex items-center justify-center",
+              isDragging ? "cursor-grabbing" : "cursor-grab"
+            )}
+            style={{ left: `calc(${valuePercentage}% - 6px)` }}
+          >
+            <span className="absolute size-2.5 bg-[#0F0F11] rounded-full"></span>
+          </div>
+          <div
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-green-50 rounded-full"
+            style={{ width: `${valuePercentage}%`, height: 4 }}
+          ></div>
+        </div>
+      </div>
+    </span>
+  );
+};
+
+export default Range;
+```

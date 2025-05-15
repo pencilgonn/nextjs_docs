@@ -1,0 +1,204 @@
+# Editor
+
+## Code
+
+``` javascript
+"use client";
+
+import { useState } from "react";
+// Rich text
+import RichTextEditor from "reactjs-tiptap-editor";
+import {
+  BaseKit,
+  Bold,
+  FontSize,
+  Clear,
+  FontFamily,
+  FormatPainter,
+  Heading,
+  History,
+  Italic,
+  SearchAndReplace,
+  Strike,
+  MoreMark,
+  Emoji,
+  BulletList,
+  OrderedList,
+  TextAlign,
+  Indent,
+  LineHeight,
+  Link,
+  Blockquote,
+  SlashCommand,
+  HorizontalRule,
+  Table,
+  ExportWord,
+  ExportPdf,
+} from "reactjs-tiptap-editor/extension-bundle";
+import { locale } from "reactjs-tiptap-editor/locale-bundle";
+// Import CSS
+import "reactjs-tiptap-editor/style.css";
+
+const extensions = [
+  BaseKit.configure({
+    placeholder: {
+      showOnlyCurrent: true,
+    },
+    characterCount: false,
+  }),
+  History,
+  SearchAndReplace,
+  // TableOfContents,
+  FormatPainter.configure({ spacer: true }),
+  Clear,
+  FontFamily,
+  Heading.configure({ spacer: true }),
+  FontSize,
+  Bold,
+  Italic,
+  // TextUnderline,
+  Strike,
+  MoreMark,
+  Emoji,
+  // Color.configure({ spacer: true }),
+  // Highlight,
+  BulletList,
+  OrderedList,
+  TextAlign.configure({ types: ["heading", "paragraph"], spacer: true }),
+  // Indent,
+  LineHeight,
+  // TaskList.configure({
+  //   spacer: true,
+  //   taskItem: {
+  //     nested: true,
+  //   },
+  // }),
+  Link,
+  // Image.configure({
+  //   upload: (files: File) => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         resolve(URL.createObjectURL(files));
+  //       }, 500);
+  //     });
+  //   },
+  // }),
+  // Video.configure({
+  //   upload: (files: File) => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         resolve(URL.createObjectURL(files));
+  //       }, 500);
+  //     });
+  //   },
+  // }),
+  // ImageGif.configure({
+  //   GIPHY_API_KEY: process.env.NEXT_PUBLIC_GIPHY_API_KEY as string,
+  // }),
+  Blockquote,
+  SlashCommand,
+  HorizontalRule,
+  // Code.configure({
+  //   toolbar: false,
+  // }),
+  // CodeBlock,
+  // ColumnActionButton,
+  Table,
+  // Iframe,
+
+  // ImportWord.configure({
+  //   upload: (files: File[]) => {
+  //     const f = files.map((file) => ({
+  //       src: URL.createObjectURL(file),
+  //       alt: file.name,
+  //     }));
+  //     return Promise.resolve(f);
+  //   },
+  // }),
+  // TextDirection,
+  // Mention,
+  // Attachment.configure({
+  //   upload: (file: any) => {
+  //     // fake upload return base 64
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         const blob = convertBase64ToBlob(reader.result as string);
+  //         resolve(URL.createObjectURL(blob));
+  //       }, 300);
+  //     });
+  //   },
+  // }),
+  // Katex,
+  // Excalidraw,
+  // Mermaid.configure({
+  //   upload: (file: any) => {
+  //     // fake upload return base 64
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         const blob = convertBase64ToBlob(reader.result as string);
+  //         resolve(URL.createObjectURL(blob));
+  //       }, 300);
+  //     });
+  //   },
+  // }),
+  // Drawer.configure({
+  //   upload: (file: any) => {
+  //     // fake upload return base 64
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         const blob = convertBase64ToBlob(reader.result as string);
+  //         resolve(URL.createObjectURL(blob));
+  //       }, 300);
+  //     });
+  //   },
+  // }),
+  ExportPdf.configure({ spacer: true }),
+  ExportWord,
+  // Twitter,
+];
+type Props = {
+  content: string;
+  setContent: (content: string) => void;
+  setCanSave: (save: boolean) => void;
+};
+
+const Editor: React.FC<Props> = ({ content, setContent, setCanSave }) => {
+  const [isInit, setIsInit] = useState(false);
+
+  const onChangeContent = (value: any) => {
+    locale.setLang("vi");
+    setContent(value);
+  };
+
+  if (!content) return;
+
+  return (
+    <RichTextEditor
+      output="html"
+      removeDefaultWrapper={true}
+      content={content}
+      onChangeContent={(val) => {
+        onChangeContent(val);
+        setIsInit(true);
+        if (isInit) {
+          setCanSave(true);
+        }
+      }}
+      extensions={extensions}
+      dark={false}
+      contentClass={["richtext-content"]}
+    />
+  );
+};
+
+export default Editor;
+```

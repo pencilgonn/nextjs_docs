@@ -14,7 +14,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 id={textToSlug(children)} className="text-2xl mt-8">
+      <h2 id={textToSlug(children)} className="text-2xl mt-8 [h1~h2]:mt-0">
         {children}
       </h2>
     ),

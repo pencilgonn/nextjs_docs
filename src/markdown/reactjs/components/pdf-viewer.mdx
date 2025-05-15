@@ -1,0 +1,33 @@
+# Pdf Viewer
+
+## Code
+
+```javascript
+import { SpecialZoomLevel, Worker } from "@react-pdf-viewer/core";
+import { Viewer } from "@react-pdf-viewer/core";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+
+type TFile = {
+  id: string,
+  name: string,
+  originalName: string,
+  url: string,
+  mimetype: string,
+  size: number,
+  isPublic: boolean,
+  uploadedBy: string,
+  createdAt: string,
+  fileCategory: string,
+  status: string,
+  statusUpdatedAt: string,
+};
+
+const PdfViewer: React.FC<{ file: TFile }> = ({ file }) => {
+  return (
+    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+      <Viewer defaultScale={SpecialZoomLevel.PageWidth} fileUrl={file.url} />
+    </Worker>
+  );
+};
+export default PdfViewer;
+```

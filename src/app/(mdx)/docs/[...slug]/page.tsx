@@ -16,8 +16,6 @@ export default async function Page({
 
 export function generateStaticParams() {
   return [
-    { slug: ["welcome"] },
-
     // generate slug
     ...flattenRoutes(routes).map((route) => ({
       slug: route.to.split("/").slice(2),

@@ -1,0 +1,94 @@
+# RecognationSpeech
+
+## Code
+
+``` javascript
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useChatContext } from "@/contexts/ChatContext";
+import useDetectBrower from "@/hooks/common/useDetectBrower";
+import useAppStore from "@/store/app.store";
+import { useEffect, useRef } from "react";
+
+const RecognationSpeech = () => {
+  const recognitionRef = useRef<any>(null);
+  const { chat, setChat } = useAppStore();
+  const { isFirefox, isIE } = useDetectBrower();
+  const { setPrompt } = useChatContext();
+  
+  // Tạo instance recognition một lần khi component mount
+  useEffect(() => {
+    if (isFirefox || isIE) return;
+    const recognition = new ((window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition)();
+    recognition.lang = "vi-VN";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      setChat({ listen: true });
+    };
+    recognition.onend = () => {};
+
+    recognition.onerror = (event: any) => {
+      if (
+        event?.error === "not-allowed" ||
+        event?.error === "not-supported" ||
+        event?.error === "audio-capture"
+      ) {
+        setChat({ action: "text", live: false });
+      }
+    };
+
+    recognition.onresult = (event: any) => {
+      if (chat.think) return;
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setPrompt(transcript);
+    };
+
+    recognitionRef.current = recognition;
+    return () => {
+      recognition.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!recognitionRef.current) return;
+    if (chat.stop || chat.action == "text" || !chat.listen) {
+      recognitionRef.current.abort();
+    }
+    if (chat.listen && chat.action == "voice") {
+      recognitionRef.current.start();
+    }
+  }, [chat.listen, chat.stop]);
+
+  useEffect(() => {
+    if (!recognitionRef.current) return;
+    if (chat.live) {
+      recognitionRef.current.onresult = (event: any) => {
+        if (chat.think) return;
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setPrompt(transcript);
+      };
+    }
+  }, [chat.live]);
+
+  useEffect(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.onend = () => {
+        if (chat.listen) recognitionRef.current.start();
+        if (!chat.listen) recognitionRef.current.abort();
+      };
+    }
+  }, [chat.listen]);
+
+  return <></>;
+};
+
+export default RecognationSpeech;
+```

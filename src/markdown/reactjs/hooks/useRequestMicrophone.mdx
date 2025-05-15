@@ -1,0 +1,60 @@
+# useRequestMicrophone()
+
+## Code
+
+``` useRequestMicrophone.ts
+import { useCallback } from "react";
+
+/**
+ * Hook để check và xin quyền microphone.
+ * @returns Một hàm thực thi, trả về Promise<{status: boolean, message: string}> (status: quyền, message: thông báo)
+ */
+export function useRequestMicrophone() {
+  const requestMicrophone = useCallback(async (): Promise<{
+    status: boolean;
+    message: string;
+  }> => {
+    // 1. Kiểm tra feature support
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return { status: false, message: "Trình duyệt không hỗ trợ Microphone" };
+    }
+
+    // 2. Thử đọc trạng thái permission (nếu browser hỗ trợ)
+    try {
+      // @ts-ignore
+      const status = await navigator.permissions.query({ name: "microphone" });
+      if (status.state === "granted") {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          // Dừng stream ngay sau khi lấy được để không chiếm mic
+          stream.getTracks().forEach((t) => t.stop());
+          return { status: true, message: "" };
+        } catch (err) {
+          return { status: false, message: "Không tìm thấy Microphone:" };
+        }
+      }
+      if (status.state === "denied") {
+        return { status: false, message: "Quyền microphone đã bị từ chối" };
+      }
+      // nếu là "prompt", sẽ chuyển sang xin qua getUserMedia
+    } catch {
+      // một số browser (Safari mobile) không support navigator.permissions
+    }
+
+    // 3. Xin quyền qua getUserMedia
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Dừng stream ngay sau khi lấy được để không chiếm mic
+      stream.getTracks().forEach((t) => t.stop());
+      return { status: true, message: "" };
+    } catch (err) {
+      return { status: false, message: "Không tìm thấy Microphone:" };
+    }
+  }, []);
+
+  return requestMicrophone;
+}
+
+```

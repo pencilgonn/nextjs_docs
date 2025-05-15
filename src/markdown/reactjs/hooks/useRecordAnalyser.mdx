@@ -1,0 +1,117 @@
+# useRecordAnalyser()
+
+## Code
+
+``` useRecordAnalyser.ts
+"use client";
+
+import { toastify } from "@/utils/toastify";
+import { useEffect, useRef, useState } from "react";
+
+const useRecordAnalyser = (condition: boolean, closeNotMic: () => void) => {
+  const [analyser, setAnalyser] = useState<AnalyserNode>();
+  const [audioLevel, setAudioLevel] = useState(0);
+  const audioRef = useRef<AudioContext | null>(null);
+  const [recording, setRecording] = useState(false);
+  const streamRef = useRef<MediaStream | null>(null);
+  
+  const drawWaveform = (analyser: any) => {
+    if (!analyser) {
+      return;
+    }
+    // Sử dụng frequencyBinCount để lấy dữ liệu tần số
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    // Sử dụng getByteFrequencyData thay vì getByteTimeDomainData
+    analyser.getByteFrequencyData(dataArray);
+
+    // Tính toán độ to của âm thanh
+    const average = dataArray.reduce((acc, val) => acc + val, 0) / bufferLength;
+    const normalizedLevel = Math.min(average / 128, 2); // Giới hạn mức tối đa
+    setAudioLevel(normalizedLevel);
+
+    // Vẽ waveform
+    const waveformArray = new Uint8Array(analyser.fftSize);
+    analyser.getByteTimeDomainData(waveformArray);
+    requestAnimationFrame(() => drawWaveform(analyser));
+  };
+
+  useEffect(() => {
+    const startRecording = async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toastify.error("Trình duyệt không hỗ trợ ghi âm!");
+        return;
+      }
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const hasMic = devices.some((device) => device.kind === "audioinput");
+        if (!hasMic) {
+          toastify.error("Không tìm thấy thiết bị ghi âm!");
+          closeNotMic();
+          return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream; // Lưu stream vào ref để quản lý
+  
+        const audioCtx: AudioContext = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+        audioRef.current = audioCtx;
+  
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+        const source = audioCtx.createMediaStreamSource(stream);
+        source.connect(analyser);
+        setAnalyser(analyser);
+        audioCtx.resume().then(() => setRecording(true));
+        drawWaveform(analyser);
+      } catch (error) {
+        console.error("Error starting recording:", error);
+      }
+    };
+  
+    if (condition) {
+      startRecording();
+    } else {
+      // Dừng AudioContext
+      if (audioRef.current) {
+        audioRef.current.close();
+        audioRef.current = null;
+      }
+  
+      // Dừng tất cả track của MediaStream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+  
+      setRecording(false);
+    }
+  
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.close();
+        audioRef.current = null;
+      }
+  
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [condition]);
+  
+  useEffect(() => {
+    if (analyser && condition) {
+      drawWaveform(analyser);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analyser, condition]);
+
+  return { audioLevel, recording };
+};
+
+export default useRecordAnalyser;
+
+```
