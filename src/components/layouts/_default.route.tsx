@@ -16,12 +16,12 @@ export const routes = [
             brief: "",
             icon: null,
           },
-          {
-            label: "Pagination",
-            to: "/docs/reactjs/components/pagination",
-            brief: "",
-            icon: null,
-          },
+          // {
+          //   label: "Pagination",
+          //   to: "/docs/reactjs/components/pagination",
+          //   brief: "",
+          //   icon: null,
+          // },
           {
             label: "RecognationSpeech",
             to: "/docs/reactjs/components/recognationSpeech",
