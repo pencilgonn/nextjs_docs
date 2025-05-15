@@ -1,0 +1,63 @@
+# readFileZip()
+
+This function is used to read a file and return the content as a string, object, or null.
+
+## Code
+
+``` readFileZip.ts 
+import JSZip from "jszip";
+
+const readFileZIP = (
+  file: File
+): Promise<{ [filename: string]: File } | null> => {
+  return new Promise((resolve, reject) => {
+    if (!file.name.endsWith(".zip")) {
+      reject("Unsupported file type. Only .zip files are accepted.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async (e) => {
+      const content = e.target?.result;
+      if (!content) {
+        reject("Failed to read file");
+        return;
+      }
+      try {
+        const zip = new JSZip();
+        const zipContent = await zip.loadAsync(content);
+        const files: { [filename: string]: File } = {};
+
+        for (const [filename, zipEntry] of Object.entries(zipContent.files)) {
+          if (!zipEntry.dir) {
+            const fileContent = await zipEntry.async("arraybuffer");
+            const blob = new Blob([fileContent]);
+            const fileType = filename.split(".").pop()?.toLowerCase();
+            if (
+              fileType &&
+              ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"].includes(
+                fileType
+              )
+            ) {
+              files[filename] = new File([blob], filename, {
+                type: `image/${fileType}`,
+              });
+            }
+          }
+        }
+        resolve(Object.keys(files).length > 0 ? files : null);
+      } catch (error) {
+        console.error("Error unzipping file:", error);
+        reject(error);
+      }
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsArrayBuffer(file);
+  });
+};
+```
+
+## Resources
+
+* [jszip](https://stuk.github.io/jszip/)

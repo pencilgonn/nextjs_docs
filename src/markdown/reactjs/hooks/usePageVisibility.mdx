@@ -1,0 +1,89 @@
+# usePageVisibility()
+
+This usePageVisibility custom hook in React is used to detect whether the page is currently visible or not, taking into account different browser implementations. It relies on the Page Visibility API and provides a boolean state indicating the visibility status of the page.
+
+## Code
+
+``` usePageVisibility.ts
+import { useEffect, useState } from "react";
+
+const hasDocument = typeof document !== "undefined";
+const vendorEvents = [
+  {
+    hidden: "hidden",
+    event: "visibilitychange",
+    state: "visibilityState",
+  },
+  {
+    hidden: "webkitHidden",
+    event: "webkitvisibilitychange",
+    state: "webkitVisibilityState",
+  },
+  {
+    hidden: "mozHidden",
+    event: "mozvisibilitychange",
+    state: "mozVisibilityState",
+  },
+  {
+    hidden: "msHidden",
+    event: "msvisibilitychange",
+    state: "msVisibilityState",
+  },
+  {
+    hidden: "oHidden",
+    event: "ovisibilitychange",
+    state: "oVisibilityState",
+  },
+];
+
+const isSupported = hasDocument && Boolean(document.addEventListener);
+
+const visibility = (() => {
+  if (!isSupported) {
+    return null;
+  }
+  for (const event of vendorEvents) {
+    if (event.hidden in document) {
+      return event;
+    }
+  }
+  // otherwise it's not supported
+  return null;
+})();
+
+const getHandlerArgs = () => {
+  if (!visibility) {
+    return [true, "visible"];
+  }
+  const { hidden, state } = visibility;
+  //@ts-ignore
+  return [!document[hidden], document[state]];
+};
+
+const usePageVisibility = () => {
+  const isSupportedLocal = isSupported && visibility;
+  const [initiallyVisible] = getHandlerArgs();
+
+  const [isVisible, setIsVisible] = useState(initiallyVisible);
+
+  useEffect(() => {
+    if (isSupportedLocal && visibility) {
+      const handler = () => {
+        const [currentlyVisible] = getHandlerArgs();
+
+        setIsVisible(currentlyVisible);
+      };
+
+      document.addEventListener(visibility.event, handler);
+
+      return () => {
+        document.removeEventListener(visibility.event, handler);
+      };
+    }
+  }, []);
+
+  return isVisible;
+};
+
+export default usePageVisibility;
+```

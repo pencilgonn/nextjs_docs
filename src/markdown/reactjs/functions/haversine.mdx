@@ -1,0 +1,35 @@
+# haversine()
+
+The haversine function you provided calculates the distance between two points on the Earth's surface using the Haversine formula. This formula takes into account the curvature of the Earth's surface and is commonly used to calculate distances between two geographic coordinates.
+
+## Code
+
+``` haversine.ts
+const haversine = (
+  latFrom: number,
+  lngFrom: number,
+  latTo: number,
+  lngTo: number
+) => {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = degToRad(latTo - latFrom);
+  const dLon = degToRad(lngTo - lngFrom);
+
+  latFrom = degToRad(latFrom);
+  latTo = degToRad(latTo);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) *
+      Math.sin(dLon / 2) *
+      Math.cos(latFrom) *
+      Math.cos(latTo);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+
+  return distance;
+};
+const degToRad = (degrees: number) => {
+  return degrees * (Math.PI / 180);
+};
+```

@@ -1,0 +1,21 @@
+# removeDuplicateElement()
+
+The removeDuplicateElement function you provided is designed to remove duplicate elements from an array of objects based on a specific property (year in this case). It uses two separate mechanisms to handle primitive types and objects.
+
+## Code
+
+``` removeDuplicateElement.ts
+const removeDuplicateElement = (key: string, data: any) => {
+  const prims = { boolean: {}, number: {}, string: {} };
+  const objs = [];
+
+  return data.filter(function (item) {
+    var type = typeof item[key];
+    if (type in prims)
+      return prims[type].hasOwnProperty(item[key])
+        ? false
+        : (prims[type][item[key]] = true);
+    else return objs.indexOf(item[key]) >= 0 ? false : objs.push(item[key]);
+  });
+};
+```

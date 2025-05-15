@@ -17,7 +17,7 @@ type Route = {
 
 const Sidebar = () => {
   return (
-    <div className="w-[284px] flex-shrink-0 max-h-[calc(100dvh-146px)] scroll__custom overflow-y-auto overflow-x-hidden">
+    <div className="w-[284px] sticky top-[105px] flex-shrink-0 max-h-[calc(100dvh-146px)] scroll__custom overflow-y-auto overflow-x-hidden">
       <aside>
         <div className="pr-4">
           {routes.map((route, index) => (
@@ -59,7 +59,9 @@ const Menu: React.FC<{
               route.children.length > 0 &&
               pathname == route.to &&
               level > 0 &&
-              "text-primary"
+              "text-primary",
+            level == 1 && pathname.includes(route.to) && "text-primary",
+            level == 2 && pathname.includes(route.to) && "text-white/90"
           )}
         >
           {route.label} {route.icon && route.icon}

@@ -1,0 +1,22 @@
+# copyText()
+
+This custom hook in React is designed to handle asynchronous initialization of a component. It allows you to initialize a component's state or perform other setup tasks asynchronously, ensuring that the component is only rendered after the initialization is complete.
+
+## Code
+
+``` copyText.ts
+const copyText = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (error) {
+    console.error(error);
+  }
+};
+```
+
+## Example 
+
+``` javascript
+
+copyText("Copy now!");
+```

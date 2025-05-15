@@ -1,0 +1,90 @@
+# useMqtt()
+
+## Code
+
+``` useMqtt.ts
+import mqtt, { MqttClient } from "mqtt";
+import { useEffect, useState } from "react";
+
+const useMqtt = (url: string, host: string, topic: string) => {
+  const [client, setClient] = useState<MqttClient | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [message, setMessage] = useState<{
+    message: string;
+    roomId: string;
+    userId: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (client) {
+      subcribe(topic);
+      client.on("message", (_topic: string, message) => {
+        const newMessage = new TextDecoder("utf-8").decode(message);
+        setMessage(JSON.parse(newMessage));
+      });
+
+      setIsConnected(true);
+      if (isConnected || topic.length < 8) return;
+    }
+    const clientConnect = mqtt.connect(`wss://${url}:${host}/mqtt`, {
+      clientId: `mqttjs_${Math.random().toString(16).substr(2, 8)}`,
+      reconnectPeriod: 1000,
+      username: "exmqtt",
+      password: "exmqtt",
+      connectTimeout: 30 * 1000,
+      keepalive: 60,
+      clean: true,
+    });
+    setClient(clientConnect);
+
+    return () => {
+      if (client) {
+        unSubcribe(topic);
+        mqttDisconnect();
+      }
+    };
+  }, [topic]);
+
+  const subcribe = (topic: string) => {
+    if (client)
+      client.subscribe(topic, { qos: 0 }, (error) => {
+        if (error) {
+          console.log("Subscribe to topics error", error);
+          return;
+        }
+        console.log(`Subscribe to topics: ${topic}`);
+      });
+  };
+  const mqttDisconnect = () => {
+    if (client && client.connected) {
+      try {
+        client.end(false, () => {
+          console.log("disconnected successfully");
+        });
+      } catch (error) {
+        console.log("disconnect error:", error);
+      }
+    }
+  };
+
+  const unSubcribe = (topic: string) => {
+    if (client) {
+      client.unsubscribe(topic, { qos: 0 }, (error) => {
+        if (error) {
+          console.log("Unsubscribe error", error);
+          return;
+        }
+        console.log(`unsubscribed topic: ${topic}`);
+      });
+    }
+  };
+
+  return { isConnected, message, subcribe, unSubcribe };
+};
+
+export default useMqtt;
+```
+
+## Resources
+
+* [mqtt](https://mqtt.org/)

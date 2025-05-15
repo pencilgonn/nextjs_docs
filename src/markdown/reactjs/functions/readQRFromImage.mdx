@@ -1,0 +1,39 @@
+# readQRFromImage()
+
+The readQRFromImage function you provided is intended to read a QR code from an image encoded as a base64 string. It utilizes the jsQR library for decoding the QR code.
+
+## Code
+
+``` readQRFromImage.ts
+import jsQR from "jsqr";
+
+const readQRFromImage = async (file: File) => {
+  const base64EncodedDataPromise = new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(",")[1]);
+    reader.readAsDataURL(file);
+  });
+  const data = await base64EncodedDataPromise;
+
+  const image = new Image();
+  image.src = `data:${file.type};base64,` + data;
+
+  await new Promise((resolve) => image.addEventListener("load", resolve));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const context = canvas.getContext("2d");
+
+  context.imageSmoothingEnabled = false;
+  context.drawImage(image, 0, 0);
+  const imageData = await context.getImageData(0, 0, image.width, image.height);
+
+  const code = jsQR(imageData.data, image.width, image.height);
+  return code ? code.data : null;
+};
+```
+
+## Resources
+
+* [jsqr](https://www.npmjs.com/package/jsqr)

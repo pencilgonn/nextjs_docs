@@ -4,7 +4,9 @@ import { routes } from "@/components/layouts/_default.route";
 import Navigate from "@/components/layouts/Navigate";
 import Sidebar from "@/components/layouts/Sidebar";
 import TocDocs from "@/components/layouts/TocDocs";
+import { cn } from "@/lib/utils";
 import { flattenRoutes } from "@/utils";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
@@ -15,6 +17,10 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toc, setToc] = useState<{ text: string; id: string; level: number }[]>(
     []
   );
+
+  const breadcrums = useMemo(() => {
+    return pathname.split("/").splice(2);
+  }, [pathname]);
 
   const flatArrRoutes = flattenRoutes(routes);
 
@@ -37,13 +43,35 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
     }));
 
     setToc(result);
-  }, []);
+  }, [pathname]);
 
   return (
-    <div className="flex items-start">
+    <div className="flex items-start relative">
       <Sidebar />
-      <div className="grow px-6">
-        <div ref={ref}>{children}</div>
+      <div className="grow px-6 flex flex-col overflow-hidden">
+        <div className="flex gap-3">
+          {breadcrums.map((item, index) => (
+            <div
+              className={cn(
+                "flex gap-3 text-sm",
+                index < breadcrums.length - 1 && "text-white/65"
+              )}
+              key={index}
+            >
+              <Link
+                href={`/docs/${breadcrums.slice(0, index + 1).join("/")}`}
+                key={index}
+                className="capitalize"
+              >
+                {item.replaceAll("-", " ")}
+              </Link>
+              {index < breadcrums.length - 1 && <ChevronRight size={20} />}
+            </div>
+          ))}
+        </div>
+        <div ref={ref} className="flex flex-col max-w-none grow mt-4">
+          {children}
+        </div>
         {currentRoute && currentRoute.children && (
           <div className="grid grid-cols-2 gap-6 mt-10">
             {currentRoute.children.map((route: any, index: number) => (

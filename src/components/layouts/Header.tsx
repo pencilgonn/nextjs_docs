@@ -18,7 +18,7 @@ const Header: React.FC<Props> = () => {
   };
 
   return (
-    <header className="sticky top-0 border-b border-gray-300/20">
+    <header className="sticky top-0 border-b z-20 border-gray-300/20 bg-background">
       <div className="px-6">
         <div className="max-w-[1400px] w-full mx-auto h-16 flex items-center">
           <div className="flex justify-between grow">
@@ -43,7 +43,10 @@ const Header: React.FC<Props> = () => {
               >
                 <div className="cursor-pointer text-sm bg-gray-100/10 px-2 py-1 rounded gap-4 flex items-center">
                   <span className="opacity-70">Search documentation...</span>
-                  <span className="bg-background/60 border border-gray-300/20 px-1 py-0.5 text-xs rounded-md">
+                  <span
+                    className="bg-background/60 border border-gray-300/20 px-1 py-0.5 text-xs rounded-md"
+                    suppressHydrationWarning
+                  >
                     {getShortcutKeys(["mod"])} K
                   </span>
                 </div>

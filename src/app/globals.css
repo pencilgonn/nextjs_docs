@@ -36,3 +36,21 @@ body {
   background: var(--foreground);
   border-radius: 50px;
 }
+
+* {
+  scroll-padding-top: 100px;
+  scrollbar-color: #6b6b6b #2b2b2b;
+}
+
+.code__Wraper pre {
+  padding: 1.5em !important;
+  background: #0a0a0a !important;
+}
+.code__Wraper span.comment.linenumber.react-syntax-highlighter-line-number {
+  font-size: 12px !important;
+  padding-right: 2em !important;
+}
+
+.code__Wraper span.comment.linenumber.react-syntax-highlighter-line-number:last-child {
+  display: none !important;
+}
